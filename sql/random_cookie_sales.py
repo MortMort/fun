@@ -3,6 +3,7 @@ from random import random as rf
 from random import seed
 
 
+# Insert strings into a list with name of a cookie_salesperson with the sales amount and date of sales
 people = {1: 'Britney', 2: 'Marta', 3: 'Lindsay', 4: 'Paris', 5: 'Nicole'}
 
 list = []
