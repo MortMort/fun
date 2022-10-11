@@ -4,6 +4,7 @@ from glob import glob       # Retreving a list of folders and subfolders
 import PySimpleGUI as sg    # GUI for inputting stuffff
 import tkinter as tk
 from tkinter import filedialog
+import sys                  # Exit code when error occurs
 
 # TO-DO: Make code stop running if no path is input!
 # TO-DO: Make a pop-up which states whether any files have been changed
@@ -28,14 +29,18 @@ root = tk.Tk()
 root.withdraw()
 
 # Opens a pop-up. The selected directory path goes into selected_dir
-
-
 selected_dir = filedialog.askdirectory()
+
+# Check whether a folder was selected. Exit code if not
+if len(selected_dir) == 0:
+    print("Error! No directory selected. Stopping the script")
+    sys.exit()
+
+# Add /**/ to path such that subdirectories are found when using glob()
 path = os.path.join(selected_dir, "**", "")
 
-
+# Create list of folders and subfolders
 all_dirs = glob(path, recursive=True)
-
 # Loop through the list of directories
 for dir in all_dirs:
     # Loop through every pattern
