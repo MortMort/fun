@@ -1,40 +1,15 @@
 import re                   # Regular Expressions
 import os                   # Folders and stuff
 from glob import glob       # Retreving a list of folders and subfolders
-
 import PySimpleGUI as sg    # GUI for inputting stuffff
+import tkinter as tk
+from tkinter import filedialog
 
-# Test string for git push
-
-# GUI for inputting path to folder
-# TO-DO: Include possibility of inputting folder by selecting it in a window!
 # TO-DO: Make code stop running if no path is input!
-# ==============================================================================
-# Add some color to the windowp
-sg.theme('SandyBeach')     
-  
-# Very basic window. Return values using automatic-numbered keys
-layout = [
-    [sg.Text('Please enter path. e.g. "/Users/martin/Documents')],
-    [sg.Text('Path', size =(15, 1)), sg.InputText()],
-    [sg.Submit(), sg.Cancel()]
-]
-  
-window = sg.Window('Simple data entry window', layout)
-event, values = window.read()
-window.close()
-  
-# The input data looks like a simple list  when automatic numbered
-print(event, values[0]) 
-
-# The path input via the GUI
-input_path = values[0]
-
-path =  os.path.join(input_path, "**", "")
-print("joined path:", path) 
+# TO-DO: Make a pop-up which states whether any files have been changed
+# and maybe which files??
 
 
-# ==============================================================================
 
 # EDIT: Define patterns to look for and the replacements:
 patterns = ["^(\d{2}. |\w\d\. |\w\. )(.+)( - )", 
@@ -45,6 +20,19 @@ replacements = [r'\2\3\1',
                 r'\3\4\1. ', 
                 r''
                 ]
+
+
+# Open pop-up to input folder for file renaming
+# ==============================================================================
+root = tk.Tk()
+root.withdraw()
+
+# Opens a pop-up. The selected directory path goes into selected_dir
+
+
+selected_dir = filedialog.askdirectory()
+path = os.path.join(selected_dir, "**", "")
+
 
 all_dirs = glob(path, recursive=True)
 
