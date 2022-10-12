@@ -35,6 +35,10 @@ root.withdraw()
 # Opens a pop-up. The selected directory path goes into selected_dir
 selected_dir = filedialog.askdirectory()
 
+# Adding this line to more easily differnetiate file erros and script output
+# form the annoying Alpha value message..
+print("------------------------------------------------------------------")
+
 # Check whether a folder was selected. Exit code if not
 if len(selected_dir) == 0:
     print("Error! No directory selected. Stopping the script")
