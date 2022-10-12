@@ -6,19 +6,21 @@ import tkinter as tk
 from tkinter import filedialog
 import sys                  # Exit code when error occurs
 
-# TO-DO: Make code stop running if no path is input!
 # TO-DO: Make a pop-up which states whether any files have been changed
 # and maybe which files??
+# TO-DO: Remove any double spaces
 
 
 
 # EDIT: Define patterns to look for and the replacements:
 patterns = ["^(\d{2}. |\w\d\. |\w\. )(.+)( - )", 
             "^(\d{2}|\w\d|\w)( )(.+)( - )", 
-            "^(- |\. )"
+            "^(- |\. )",
+            "  {2,}"
             ]
 replacements = [r'\2\3\1', 
                 r'\3\4\1. ', 
+                r'',
                 r''
                 ]
 
