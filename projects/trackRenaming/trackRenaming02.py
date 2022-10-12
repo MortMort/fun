@@ -17,13 +17,14 @@ patterns = ["^(\d{2}. |\w\d\. |\w\. )(.+)( - )",    # 01. ->
             "^(\d{2}|\w\d|\w)( )(.+)( - )",         # 01 ->
             "^(- |\. )",                            # Remove "- " and ". "
             "  {2,}",                               # Remove "  "
-            r"\b([a-z])\B"                            # Uppercase
+            r"(?<!\.)\b[a-z]"                      # Uppercase
             ]
 replacements = [r'\2\3\1', 
                 r'\3\4\1. ', 
                 r'',
                 r'',
-                r'\1'
+                r''         # This row is irrelevant since special replacement is 
+                            # run at the 4th pattern (counting from 0)
                 ]
 
 
@@ -66,16 +67,18 @@ for dir in all_dirs:
                 if not match :
                     continue
                 try:
+                    # The 4th pattern has special code assigned to it:
                     if ii == 4:
+                        # Find all (lowercase) letters matching the pattern
                         lower_case = re.findall(patterns[ii], filename)
-                        print(lower_case)
+                        new_name_temp = filename # Predefine temporary name from filename
                         nn = 0
-                        upper_case = []
-                        new_name_temp = filename
+                        # In the following loop lowercase character is flipped to
+                        # upper case and replaced with the re.sub() function iteratively
                         for char in lower_case:
-                            char_upper = char.upper()
-                            upper_case.append(char_upper)
-                            char_pattern = r"\b(" + char + ")\B"
+                            char_upper = char.upper()       # Set upper case
+                            char_pattern = r"(?<!\.)\b" + char # NOTE: This pattern should match
+                                                               # the pattern in the top of the script
                             new_name_temp = re.sub(char_pattern, char_upper, new_name_temp)
                             nn = nn+1
                         print(new_name_temp)
