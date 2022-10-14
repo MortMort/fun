@@ -28,24 +28,30 @@ def select_dir():
 
 def handle_subdirs(directory, incl_subdirs):
     # A simple function for
-    if incl_subdirs:
+    if incl_subdirs == True:
         # Add /**/ to path such that subdirectories are found when using glob()
         path = os.path.join(directory, "**", "")
         return glob(path, recursive=True)
-    else:
+    elif incl_subdirs == False:
         path = os.path.join(directory, "")
         return [path]
-        
-    
-    # Create a list of paths
-    #return glob(path, recursive=True)
+    else:
+        print("Error!: incl_subdirs not set to either of the two options: True, False. Exiting")
+        sys.exit()
+
 
 
 def pattern_replace(directory, patterns, replacements, incl_subdirs):
 
+    # Handle errors
+    if len(patterns) != len(replacements):
+        print("Error!: Patterns != replacements! Exiting")
+        sys.exit()
+    
     all_dirs = handle_subdirs(directory, incl_subdirs)
 
     print("List of renamed files:")
+
 
     for ii in range(len(patterns)):
         # Loop through the list of directories
@@ -69,7 +75,8 @@ def pattern_replace(directory, patterns, replacements, incl_subdirs):
                     except re.error:
                         continue
                     os.rename(full_file_path, new_name_full)
-                    print('%s -> %s' % (file_name, new_name))
+                    print('%s -> %s' % (file_name, new_name))        
+
 
 
 
@@ -143,6 +150,27 @@ def create_filelist(all_dirs):
     
     return file_list, full_file_path_list
 
+def find_renamed_files(original_file_list, new_file_list):
+
+    if len(original_file_list) != len(new_file_list):
+        print("Error!: The two file lists are not the same length! Exiting")
+        sys.exit()
+    
+    # Set up list
+    renamed_list = []
+    original_list = []
+
+
+    # Set up iterator
+    new_file_iter = iter(new_file_list)
+    # Go through list of files
+    for original_file in original_file_list:
+        new_file = next(new_file_iter)
+        if original_file != new_file:
+            renamed_list.append(new_file)
+            original_list.append(original_file)
+            print('%s -> %s' % (original_file, new_file))
+
 
 # ==============================================================================
 # SCRIPT
@@ -186,12 +214,12 @@ print("------------------------------------------------------------------")
 # Opens a pop-up. The selected directory path goes into selected_dir
 selected_dir = select_dir()
 
-pattern_replace(selected_dir, patterns, replacements, incl_subdirs = False)
+pattern_replace(selected_dir, patterns, replacements, incl_subdirs = 0)
 upper_case_first_letter(selected_dir, incl_subdirs=False)
 
 # PROBLEM: the function does not run through pattern recursively!
 #for ii in range(len(patterns2)):
-pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs=False)
+pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs=0)
 
 
-#file_list, full_file_path_list = create_filelist(selected_dir)
+find_renamed_files(["file1", "file2"], ["file1", "fileFoo"])
