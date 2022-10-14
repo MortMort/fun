@@ -3,7 +3,7 @@ import os                   # Folders and stuff
 from glob import glob       # Retreving a list of folders and subfolders
 import PySimpleGUI as sg    # GUI for inputting stuffff
 import tkinter as tk
-from tkinter import filedialog
+
 import sys                  # Exit code when error occurs
 
 # TO-DO: Make a pop-up which states whether any files have been changed
@@ -19,11 +19,11 @@ def select_dir():
     root.withdraw()
 
     # Opens a pop-up. 
-    selected_dir = filedialog.askdirectory()
+    selected_dir = tk.filedialog.askdirectory()
 
     # Check whether a folder was selected. Exit code if not
     if len(selected_dir) == 0:
-        print("No directory selected!")
+        print("Error!: No directory selected in directory dialog box! Continuing though.")
     else:
         return selected_dir
 
@@ -50,6 +50,13 @@ def pattern_replace(directory, patterns, replacements, incl_subdirs):
     # Handle errors
     if len(patterns) != len(replacements):
         print("Error!: Patterns != replacements! Exiting")
+        sys.exit()
+    
+    if (str(type(directory)) != "<class 'str'>"):
+        print("Error!: No directory input for pattern search! Exiting.")
+        sys.exit()
+    elif (len(directory) < 5):
+        print("Error!: No directory input for pattern search! Exiting.")
         sys.exit()
     
     all_dirs = handle_subdirs(directory, incl_subdirs)
@@ -176,6 +183,41 @@ def find_renamed_files(original_file_list, new_file_list):
             print('%s -> %s' % (original_file, new_file))
 
 
+def select_options():
+    # Used such that options can be included when running the script
+    # Currently it only implements the option to select subdirectories
+
+    def exit_tk():
+        root.destroy()
+        root.quit()
+
+    # Create an instance of tkinter frame
+    root = tk.Tk("Select options")
+
+    # Set the geometry of Tkinter frame
+    root.geometry("250x200")
+
+    # Define empty variables
+    checkbox_bool = tk.IntVar()
+
+    # Define a Checkbox
+    t1 = tk.Checkbutton(root, text="Include subdirectories?", variable=checkbox_bool, onvalue=1, offvalue=0)
+    t1.pack()
+
+    tk.Button(root, text="Quit", command=exit_tk).pack() #button to close the window
+
+    if checkbox_bool == 1:
+        incl_subdirs = True
+    else:
+        incl_subdirs = False
+
+    root.mainloop()
+
+    return incl_subdirs
+
+
+
+
 
 # ==============================================================================
 # SCRIPT
@@ -218,12 +260,18 @@ replacements2 = [
 
 # Note when using Path Finder use "Copy path as UNIX" for the correct
 # path format. Spaces (" ") should not be backslashed
+
 #selected_dir = "/Users/martin/Downloads/Telegram Desktop/Test/"
 selected_dir = select_dir()
 
-pattern_replace(selected_dir, patterns, replacements, incl_subdirs = True)
-pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs = True)
-upper_case_first_letter(selected_dir, incl_subdirs = True)
+# Opens a dialog to select whether to include subdirectories
+incl_subdirs = select_options()
+
+ 
+pattern_replace(selected_dir, patterns, replacements, incl_subdirs)
+pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs)
+upper_case_first_letter(selected_dir, incl_subdirs)
+
 
 
 # find_renamed_files(["file1", "file2"], ["file1", "fileFoo"])
