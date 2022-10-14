@@ -179,16 +179,16 @@ def find_renamed_files(original_file_list, new_file_list):
 
 # Patterns for moving ex 01 and A1 to after " - "
 patterns = [
-            "^(\d{2}. |\w\d\. |\w\. )(.+)( - )",    # 01. -> 
-            "^(\d{2}|\w\d|\w)( )(.+)( - )",         # 01 ->
-            "^(- |\. )",                            # Remove "- " and ". "
-            "  {2,}"                                # Remove two ore more spaces
+            "^(\d{2}. |\w\d\. |\w\. )(.+)( - )",    # 01. -> - 01.
+            "^(\d{2}|\w\d|\w)( )(.+)( - )",         # 01 -> - 01.
+            "^(- +|\. +| +)",                       # Remove "- " and ". " and " " from start
+            " {2,}"                                 # Replace two or more spaces with one space
             ]
 replacements = [
                 r'\2\3\1', 
-                r'\3\4\1. ', 
+                r'\3\4\1. ',
                 r'',
-                r''
+                r' '
                 ]
 
 # Patterns for replacing ex 01 with A1.
