@@ -13,6 +13,8 @@ import sys                  # Exit code when error occurs
 
 # FUNCTIONS
 def select_dir():
+    # Open a dialog window to select and return a folder path
+
     root = tk.Tk()
     root.withdraw()
 
@@ -27,7 +29,8 @@ def select_dir():
 
 
 def handle_subdirs(directory, incl_subdirs):
-    # A simple function for
+    # Returns a list of either one or several directories.
+
     if incl_subdirs == True:
         # Add /**/ to path such that subdirectories are found when using glob()
         path = os.path.join(directory, "**", "")
@@ -40,8 +43,9 @@ def handle_subdirs(directory, incl_subdirs):
         sys.exit()
 
 
-
 def pattern_replace(directory, patterns, replacements, incl_subdirs):
+    # Replaces a list of patterns with a list of replacements in one or several
+    # directories based on whether one chooses to include subdirectories
 
     # Handle errors
     if len(patterns) != len(replacements):
@@ -51,7 +55,6 @@ def pattern_replace(directory, patterns, replacements, incl_subdirs):
     all_dirs = handle_subdirs(directory, incl_subdirs)
 
     print("List of renamed files:")
-
 
     for ii in range(len(patterns)):
         # Loop through the list of directories
@@ -75,12 +78,12 @@ def pattern_replace(directory, patterns, replacements, incl_subdirs):
                     except re.error:
                         continue
                     os.rename(full_file_path, new_name_full)
-                    print('%s -> %s' % (file_name, new_name))        
-
-
+                    print('"%s" -> "%s"' % (file_name, new_name))   
 
 
 def upper_case_first_letter(directory, incl_subdirs):
+    # Uppercase the first letter in every word of all files in one or
+    # several directories
 
     # Creates a list of subdirectories. If incl_subdirs if false
     # the list just includes one directory
@@ -124,7 +127,7 @@ def upper_case_first_letter(directory, incl_subdirs):
 
 
 def create_filelist(all_dirs):
-    # NOT USED CURRENTLY
+    # Creates a list of files from a list of one or more folders
 
     # IF all_dirs is not in a list format then make it into a list
     if str(type(all_dirs)) == "<class 'str'>":
@@ -133,7 +136,7 @@ def create_filelist(all_dirs):
         dir_list = all_dirs
 
     # Predefine list of paths to every file
-    full_file_path_list = []
+    full_path_file_list = []
     file_list = []
     for dir in dir_list:
         # Create a list of the files inside the directory
@@ -146,9 +149,10 @@ def create_filelist(all_dirs):
             full_file_path = os.path.join(dir, file_name)
             # Check if an actual file is located at the full_file_path location
             if os.path.isfile(full_file_path):
-                full_file_path_list.append(full_file_path)
+                full_path_file_list.append(full_file_path)
     
-    return file_list, full_file_path_list
+    return file_list, full_path_file_list
+
 
 def find_renamed_files(original_file_list, new_file_list):
 
@@ -172,10 +176,14 @@ def find_renamed_files(original_file_list, new_file_list):
             print('%s -> %s' % (original_file, new_file))
 
 
+
 # ==============================================================================
 # SCRIPT
 
-# EDIT: Define patterns to look for and the replacements:
+# Adding this line to more easily differnetiate file erros and script output
+# from the annoying Alpha value message..
+print("------------------------------------------------------------------")
+
 
 # Patterns for moving ex 01 and A1 to after " - "
 patterns = [
@@ -207,19 +215,15 @@ replacements2 = [
                 r'\1.\2'
                 ]
 
-# Adding this line to more easily differnetiate file erros and script output
-# form the annoying Alpha value message..
-print("------------------------------------------------------------------")
 
-# Opens a pop-up. The selected directory path goes into selected_dir
+# Note when using Path Finder use "Copy path as UNIX" for the correct
+# path format. Spaces (" ") should not be backslashed
+#selected_dir = "/Users/martin/Downloads/Telegram Desktop/Test/"
 selected_dir = select_dir()
 
-pattern_replace(selected_dir, patterns, replacements, incl_subdirs = 0)
-upper_case_first_letter(selected_dir, incl_subdirs=False)
-
-# PROBLEM: the function does not run through pattern recursively!
-#for ii in range(len(patterns2)):
-pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs=0)
+pattern_replace(selected_dir, patterns, replacements, incl_subdirs = True)
+pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs = True)
+upper_case_first_letter(selected_dir, incl_subdirs = True)
 
 
-find_renamed_files(["file1", "file2"], ["file1", "fileFoo"])
+# find_renamed_files(["file1", "file2"], ["file1", "fileFoo"])
