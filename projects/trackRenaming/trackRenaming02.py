@@ -113,10 +113,11 @@ def upper_case_first_letter(directory, incl_subdirs):
                 except re.error:
                     continue
                 os.rename(full_file_path, new_name_full)
-                print('%s -> %s SUCCESS' % (file_name, new_name))
+                print('%s -> %s' % (file_name, new_name))
 
 
 def create_filelist(all_dirs):
+    # NOT USED CURRENTLY
 
     # IF all_dirs is not in a list format then make it into a list
     if str(type(all_dirs)) == "<class 'str'>":
@@ -185,8 +186,8 @@ print("------------------------------------------------------------------")
 # Opens a pop-up. The selected directory path goes into selected_dir
 selected_dir = select_dir()
 
-#pattern_replace(selected_dir, patterns, replacements, incl_subdirs = True)
-#upper_case_first_letter(selected_dir, incl_subdirs=True)
+pattern_replace(selected_dir, patterns, replacements, incl_subdirs = False)
+upper_case_first_letter(selected_dir, incl_subdirs=False)
 
 # PROBLEM: the function does not run through pattern recursively!
 #for ii in range(len(patterns2)):
