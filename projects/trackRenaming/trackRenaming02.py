@@ -2,14 +2,15 @@ import re                   # Regular Expressions
 import os                   # Folders and stuff
 from glob import glob       # Retreving a list of folders and subfolders
 import PySimpleGUI as sg    # GUI for inputting stuffff
-import tkinter as tk
-
+import tkinter as tk        # Not used currently but it can be used
+                            # to make nicer dialog boxes perhaps?
 import sys                  # Exit code when error occurs
 
-# TO-DO: Make a pop-up which states whether any files have been changed
-# and maybe which files??
-# TO-DO: Remove any double spaces
-
+# TO-DO list
+# - Make a pop-up which states whether any files have been changed
+#   and maybe which files??
+# - Check out the following link for perhaps selecting a pattern and such:
+#   https://holypython.com/gui-with-python-checkboxes-and-radio-buttons-pysimplegui-part-ii/
 
 # FUNCTIONS
 def select_dir():
@@ -91,6 +92,14 @@ def pattern_replace(directory, patterns, replacements, incl_subdirs):
 def upper_case_first_letter(directory, incl_subdirs):
     # Uppercase the first letter in every word of all files in one or
     # several directories
+
+    # Handle erros
+    if (str(type(directory)) != "<class 'str'>"):
+        print("Error!: No directory input for pattern search! Exiting.")
+        sys.exit()
+    elif (len(directory) < 5):
+        print("Error!: No directory input for pattern search! Exiting.")
+        sys.exit()
 
     # Creates a list of subdirectories. If incl_subdirs if false
     # the list just includes one directory
@@ -191,11 +200,23 @@ def select_options():
         root.destroy()
         root.quit()
 
+
     # Create an instance of tkinter frame
     root = tk.Tk("Select options")
 
-    # Set the geometry of Tkinter frame
-    root.geometry("250x200")
+    # get screen width and height
+    screen_width = root.winfo_screenwidth() # width of the screen
+    screen_height = root.winfo_screenheight() # height of the screen
+
+    # calculate x and y coordinates for the Tk root window
+    box_width = 250 # width for the Tk root
+    box_height = 200 # height for the Tk root
+    x_corr = (screen_width * 0.5) - (box_width/2)
+    y_corr = (screen_height * 0.25) - (box_height/2)
+
+    # set the dimensions of the screen and where it is placed
+    root.geometry('%dx%d+%d+%d' % (box_width, box_height, x_corr, y_corr))
+
 
     # Define empty variables
     checkbox_bool = tk.IntVar()
