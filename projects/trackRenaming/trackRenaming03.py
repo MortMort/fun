@@ -1,7 +1,8 @@
 from ast import pattern
 import re                   # Regular Expressions
 import os                   # Folders and stuff
-from glob import glob       # Retreving a list of folders and subfolders
+from glob import glob
+from turtle import title       # Retreving a list of folders and subfolders
 import PySimpleGUI as sg    # GUI for inputting stuffff
 import tkinter as tk        # Not used currently but it can be used
                             # to make nicer dialog boxes perhaps?
@@ -204,50 +205,76 @@ def find_renamed_files(original_file_list, new_file_list):
             print('%s -> %s' % (original_file, new_file))
 
 
-def select_options():
+def select_options(*default_directory):
+    # Used to select options and to select a folder
     # Used such that options can be included when running the script
-    # Currently it only implements the option to select subdirectories
+    # Defualt directory is input such that 
+	
+    root = tk.Tk()
+    root.title("Options")
+    
+    def cancel_renaming():
+        # Exits the script
+        print("Renaming cancelled: Exiting script")
+        sys.exit()
+
+
+    def open_folder():
+        # Opens a dialog window for selection of a folder
+
+        global selected_dir
+        selected_dir = tk.filedialog.askdirectory()
+            
 
     def exit_tk():
-        #win.destroy()
-        win.quit()
+        # When pressing "Continue". 
+        global selected_dir
+        # Handle not choosing a folder
+        if 'selected_dir' not in globals() or len(selected_dir) == 0:
+            if default_directory == 0:
+                print("Warning!: No directory selected in directory dialog box! Folder set to default.")
+                selected_dir = default_directory
+            else:
+                print("Warning!: No directory selected in directory dialog box and no default folder supplied. Returning empty string")
+                selected_dir = ""
+        #root.destroy()
+        root.quit()
 
-
-
-    # Create an instance of tkinter frame
-    win = tk.Toplevel()
-    win.title('Options')
 
     # get screen width and height
-    screen_width = win.winfo_screenwidth() # width of the screen
-    screen_height = win.winfo_screenheight() # height of the screen
+    screen_width = root.winfo_screenwidth() # width of the screen
+    screen_height = root.winfo_screenheight() # height of the screen
 
     # calculate x and y coordinates for the Tk win window
-    box_width = 250 # width for the Tk win
-    box_height = 200 # height for the Tk win
+    box_width = 250 # width for the Tk window
+    box_height = 200 # height for the Tk window
     x_corr = (screen_width * 0.5) - (box_width/2)
     y_corr = (screen_height * 0.25) - (box_height/2)
 
     # set the dimensions of the screen and where it is placed
-    win.geometry('%dx%d+%d+%d' % (box_width, box_height, x_corr, y_corr))
+    root.geometry('%dx%d+%d+%d' % (box_width, box_height, x_corr, y_corr))
 
-    # Define empty variables
+    # Define empty variables for checkboxes
     checkbox_val = tk.IntVar()
     checkbox_val_2 = tk.IntVar()
 
-    # Define a Checkbox
-    t1 = tk.Checkbutton(win, text="Include subdirectories?", 
+    # Set up checkboxes
+    t1 = tk.Checkbutton(root, text="Include subdirectories?", 
     variable=checkbox_val, onvalue=1, offvalue=0)
     t1.pack()
-    t2 = tk.Checkbutton(win, text="01 -> A1?", 
+    t2 = tk.Checkbutton(root, text="01 -> A1?", 
     variable=checkbox_val_2, onvalue=1, offvalue=0)
     t2.pack()
 
-    tk.Button(win, text="Continue", command=exit_tk).pack() #button to close the window
+    # Set up buttons
+    tk.Button(root, text="Continue", command=exit_tk).pack()
+    tk.Button(root, text="Select folder", command=open_folder).pack()
+    tk.Button(root, text="Cancel renaming", command=cancel_renaming).pack()
 
-    win.mainloop()
+    root.mainloop()
 
-    return checkbox_val.get(), checkbox_val_2.get()
+
+    return selected_dir, checkbox_val.get(), checkbox_val_2.get()
     
 
     
@@ -300,11 +327,11 @@ replacements2 = [
 # Note when using Path Finder use "Copy path as UNIX" for the correct
 # path format. Spaces (" ") should not be backslashed
 
-selected_dir = "/Volumes/28862793/Music/DJ/New Discoveries/29. October/Silat Beksi - Special Edition [BBR005]"
+default_dir = "/Volumes/28862793/Music/DJ/New Discoveries/29. October/Silat Beksi - Special Edition [BBR005]"
 #elected_dir = select_dir()
 
 # Opens a dialog to select whether to include subdirectories
-incl_subdirs, dig_to_vinyl = select_options()
+selected_dir, incl_subdirs, dig_to_vinyl = select_options()
 
 
 # 01. name -> name - 01.
