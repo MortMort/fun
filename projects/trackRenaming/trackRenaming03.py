@@ -14,6 +14,7 @@ import sys                  # Exit code when error occurs
 #   and maybe which files??
 # - Check out the following link for perhaps selecting a pattern and such:
 #   https://holypython.com/gui-with-python-checkboxes-and-radio-buttons-pysimplegui-part-ii/
+# - Add functionality to not rename files if there already excists a file with the name
 
 # FUNCTIONS
 def select_dir():
@@ -257,6 +258,7 @@ def select_options(*default_directory):
     # Define empty variables for checkboxes
     checkbox_val = tk.IntVar()
     checkbox_val_2 = tk.IntVar()
+    checkbox_val_3 = tk.IntVar()
 
     # Set up checkboxes
     t1 = tk.Checkbutton(root, text="Include subdirectories?", 
@@ -265,16 +267,19 @@ def select_options(*default_directory):
     t2 = tk.Checkbutton(root, text="01 -> A1?", 
     variable=checkbox_val_2, onvalue=1, offvalue=0)
     t2.pack()
+    t3 = tk.Checkbutton(root, text="Underscores to spaces?", 
+    variable=checkbox_val_3, onvalue=1, offvalue=0)
+    t3.pack()
 
     # Set up buttons
-    tk.Button(root, text="Continue", command=exit_tk).pack()
     tk.Button(root, text="Select folder", command=open_folder).pack()
+    tk.Button(root, text="Start renaming", command=exit_tk).pack()
     tk.Button(root, text="Cancel renaming", command=cancel_renaming).pack()
 
     root.mainloop()
 
 
-    return selected_dir, checkbox_val.get(), checkbox_val_2.get()
+    return selected_dir, checkbox_val.get(), checkbox_val_2.get(), checkbox_val_3.get()
     
 
     
@@ -293,18 +298,16 @@ print("------------------------------------------------------------------")
 
 # Patterns for moving ex 01 and A1 to after " - "
 patterns = [
-            "([a-zA-Z])-([a-zA-Z])",                # "-" -> " - "
+            "([a-zA-Z])-([a-zA-Z])",                # Firstly "-" -> " - "
             "^(\d{2}. |\w\d\. |\w\. )(.+)( - )",    # 01. -> - 01.
             "^(\d{2}|\w\d|\w)( )(.+)( - )",         # 01 -> - 01.
-            #"^(- +|\. +| +)",                       # Remove "- " and ". " and " " from start
-            " {2,}"                                 # Replace two or more spaces with one space
+            "^(- +|\. +| +)"                        # Remove "- " and ". " and " " from start
             ]
 replacements = [
                 r'\1 - \2',
                 r'\2\3\1', 
                 r'\3\4\1. ',
-                #r'',
-                r' '
+                r''
                 ]
 
 # Patterns for replacing ex 01 with A1.
@@ -313,7 +316,7 @@ patterns2 = [
             r"((\b02 )|(\b02\. ))",
             r"((\b03 )|(\b03\. ))",
             r"((\b04 )|(\b04\. ))",
-            r"( \w\d)( )"
+            r"( \w\d)( )"               # Put . after
             ]
 replacements2 = [
                 r'A1. ',
@@ -323,6 +326,13 @@ replacements2 = [
                 r'\1.\2'
                 ]
 
+# Patterns for cleaning up names in general.
+patterns3 = [
+            " {2,}"        # Replace two or more spaces with one space
+            ]
+replacements3 = [
+            r' '
+            ]
 
 # Note when using Path Finder use "Copy path as UNIX" for the correct
 # path format. Spaces (" ") should not be backslashed
@@ -331,8 +341,11 @@ default_dir = "/Volumes/28862793/Music/DJ/New Discoveries/29. October/Silat Beks
 #elected_dir = select_dir()
 
 # Opens a dialog to select whether to include subdirectories
-selected_dir, incl_subdirs, dig_to_vinyl = select_options()
+selected_dir, incl_subdirs, dig_to_vinyl, rvm_underscores = select_options()
 
+# Turn underscores into spaces
+if rvm_underscores:
+    pattern_replace(selected_dir, r"(?<!\.)\_", " ", incl_subdirs)
 
 # 01. name -> name - 01.
 pattern_replace(selected_dir, patterns, replacements, incl_subdirs)
@@ -341,14 +354,16 @@ pattern_replace(selected_dir, patterns, replacements, incl_subdirs)
 if dig_to_vinyl:
     pattern_replace(selected_dir, patterns2, replacements2, incl_subdirs)
 
+# Clean up files
+#pattern_replace(selected_dir, patterns3, replacements3, incl_subdirs)
+
 # Uppercase first letter in words?
 upper_case_first_letter(selected_dir, incl_subdirs)
 
 # Put the damn Cover back to cover!
 #pattern_replace(selected_dir, "Cover\.jpg", "cover.jpg", incl_subdirs)
 
-# Turn underscores into spaces
-pattern_replace(selected_dir, r"(?<!\.)\_", " ", incl_subdirs)
+
 
 
 
