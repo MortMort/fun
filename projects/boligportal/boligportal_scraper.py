@@ -21,7 +21,10 @@ import dataclasses
 import html
 import json
 import logging
+import math
 import re
+import shutil
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -60,6 +63,7 @@ class SimpleHttpClient:
     def __init__(self, user_agent: str = "Mozilla/5.0", timeout: float = 15.0):
         self._headers = {"User-Agent": user_agent}
         self._timeout = timeout
+        self._curl_available = shutil.which("curl") is not None
 
     def get(self, url: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Retrieve the specified URL and return its decoded body."""
@@ -73,10 +77,52 @@ class SimpleHttpClient:
                 full_url = f"{url}{'&' if '?' in url else '?'}{query}"
         request = urllib.request.Request(full_url, headers=self._headers)
         LOGGER.debug("Fetching %s", full_url)
-        with urllib.request.urlopen(request, timeout=self._timeout) as response:
-            charset = response.headers.get_content_charset() or "utf-8"
-            body = response.read().decode(charset, errors="replace")
-        return body
+        try:
+            with urllib.request.urlopen(request, timeout=self._timeout) as response:
+                charset = response.headers.get_content_charset() or "utf-8"
+                body = response.read().decode(charset, errors="replace")
+            return body
+        except urllib.error.URLError as exc:
+            if self._should_fallback_to_curl(exc, full_url):
+                LOGGER.debug("Falling back to curl for %s", full_url)
+                return self._curl_get(full_url)
+            raise
+
+    def _curl_get(self, url: str) -> str:
+        command = [
+            "curl",
+            "--fail",
+            "--silent",
+            "--show-error",
+            "--location",
+            "--max-time",
+            str(max(1, math.ceil(self._timeout))),
+            "--header",
+            f"User-Agent: {self._headers['User-Agent']}",
+            url,
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
+        except FileNotFoundError as exc:  # pragma: no cover - defensive
+            raise urllib.error.URLError("curl not found") from exc
+        except subprocess.CalledProcessError as exc:
+            message = exc.stderr.decode("utf-8", errors="replace")
+            raise urllib.error.URLError(message or exc) from exc
+        return completed.stdout.decode("utf-8", errors="replace")
+
+    def _should_fallback_to_curl(self, error: urllib.error.URLError, url: str) -> bool:
+        if not self._curl_available:
+            return False
+        if not url.lower().startswith("https://"):
+            return False
+        reason = getattr(error, "reason", error)
+        reason_text = str(reason).lower()
+        return "unknown url type: https" in reason_text or "does not support https" in reason_text
 
 
 class BoligPortalScraper:

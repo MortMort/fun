@@ -7,6 +7,9 @@ from dataclasses import asdict
 from typing import Any, Dict, Optional
 
 import unittest
+from unittest import mock
+
+import urllib.error
 
 from projects.boligportal.boligportal_scraper import (
     BoligPortalScraper,
@@ -103,4 +106,28 @@ class BoligPortalScraperTests(unittest.TestCase):
 
 if __name__ == "__main__":  # pragma: no cover - test module
     unittest.main()
+
+
+class SimpleHttpClientFallbackTests(unittest.TestCase):
+    def test_curl_fallback_used_when_https_unsupported(self) -> None:
+        fake_response = mock.Mock()
+        fake_response.stdout = b"<html>payload</html>"
+        fake_response.stderr = b""
+
+        with mock.patch("projects.boligportal.boligportal_scraper.shutil.which", return_value="/usr/bin/curl"):
+            client = SimpleHttpClient()
+
+        error = urllib.error.URLError("unknown url type: https")
+        with mock.patch(
+            "projects.boligportal.boligportal_scraper.urllib.request.urlopen",
+            side_effect=error,
+        ):
+            with mock.patch(
+                "projects.boligportal.boligportal_scraper.subprocess.run",
+                return_value=fake_response,
+            ) as run_mock:
+                body = client.get("https://example.com")
+
+        run_mock.assert_called_once()
+        self.assertEqual(body, "<html>payload</html>")
 
